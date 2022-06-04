@@ -1,9 +1,13 @@
+package logger;
 
+import domain.ServerEvent;
+import domain.ServerEventType;
 import lombok.extern.java.Log;
 
 import java.util.function.Consumer;
 
 @Log
+public
 class MessagesHistoryLogger implements Consumer<ServerEvent> {
 
     @Override

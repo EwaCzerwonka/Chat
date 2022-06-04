@@ -1,8 +1,12 @@
+package dependencies;
+
+import contracts.ServerWorkers;
+import domain.Worker;
 
 import java.util.HashSet;
 import java.util.Set;
 
-class HashSetServerWorkers implements ServerWorkers {
+public class HashSetServerWorkers implements ServerWorkers {
 
     private final Set<Worker> workers = new HashSet<>();
 
@@ -21,6 +25,13 @@ class HashSetServerWorkers implements ServerWorkers {
         workers.stream()
                 .filter(worker -> worker.getRoomNumber() == roomNr)
                 .forEach(worker -> worker.send(text));
+    }
+
+    @Override
+    public void display(Worker worker, String text) {
+        workers.stream()
+                .filter(w -> w.equals(worker))
+                .toList().get(0).send(text);
     }
 
 }

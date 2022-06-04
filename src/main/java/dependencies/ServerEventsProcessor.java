@@ -1,4 +1,7 @@
+package dependencies;
 
+import contracts.ServerWorkers;
+import domain.ServerEvent;
 import lombok.RequiredArgsConstructor;
 
 import java.util.function.Consumer;
@@ -14,7 +17,7 @@ public class ServerEventsProcessor implements Consumer<ServerEvent> {
             case MESSAGE_RECEIVED -> serverWorkers.broadcast(event.getPayload(), event.getSource().getRoomNumber());
             case CONNECTION_CLOSED -> serverWorkers.remove(event.getSource());
             case ROOM_CREATED -> serverWorkers.broadcast(event.getPayload(), 0);
-            case ROOM_JOINED -> serverWorkers.broadcast(event.getPayload(), event.getSource().getRoomNumber());
+            case HELP -> serverWorkers.display(event.getSource(), event.getPayload());
         }
     }
 

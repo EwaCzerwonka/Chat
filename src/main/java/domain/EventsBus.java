@@ -1,3 +1,6 @@
+package domain;
+
+import domain.ServerEvent;
 
 import java.util.HashSet;
 import java.util.Set;

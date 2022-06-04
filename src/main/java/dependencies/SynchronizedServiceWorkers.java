@@ -1,10 +1,14 @@
+package dependencies;
 
+import contracts.ServerWorkers;
+import domain.Worker;
 import lombok.RequiredArgsConstructor;
 
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @RequiredArgsConstructor
+public
 class SynchronizedServiceWorkers implements ServerWorkers {
 
     private final ServerWorkers serverWorkers;
@@ -28,6 +32,13 @@ class SynchronizedServiceWorkers implements ServerWorkers {
     public void broadcast(String text, Integer roomNr) {
         lock.readLock().lock();
         serverWorkers.broadcast(text, roomNr);
+        lock.readLock().unlock();
+    }
+
+    @Override
+    public void display(Worker worker, String text) {
+        lock.readLock().lock();
+        serverWorkers.display(worker, text);
         lock.readLock().unlock();
     }
 

@@ -1,5 +1,14 @@
+package domain;
 
 import commons.Sockets;
+import contracts.Manager;
+import contracts.ServerWorkers;
+import dependencies.HashSetServerWorkers;
+import dependencies.ServerEventsProcessor;
+import dependencies.SynchronizedRoomManager;
+import dependencies.SynchronizedServiceWorkers;
+import logger.MessagesHistoryLogger;
+import logger.ServerEventsLogger;
 import lombok.RequiredArgsConstructor;
 
 import java.io.IOException;

@@ -1,7 +1,11 @@
+package dependencies;
+
+import contracts.Manager;
+import domain.Worker;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class SynchronizedRoomManager implements Manager{
+public class SynchronizedRoomManager implements Manager {
 
     private final Manager manager;
     @Override

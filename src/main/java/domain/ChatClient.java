@@ -1,3 +1,5 @@
+package domain;
+
 import commons.Sockets;
 import commons.TextReader;
 import commons.TextWriter;

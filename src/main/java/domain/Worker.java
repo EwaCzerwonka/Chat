@@ -1,12 +1,15 @@
+package domain;
 
 import commons.Sockets;
+import commons.TextParser;
 import commons.TextReader;
 import commons.TextWriter;
+import contracts.Manager;
 
 import java.net.Socket;
 
 
-class Worker implements Runnable {
+public class Worker implements Runnable {
 
     private final Socket socket;
     private final EventsBus eventsBus;
@@ -15,11 +18,18 @@ class Worker implements Runnable {
     private final Manager roomManager;
 
     private Integer roomNumber = 0;
+    private static final String MENU = """
+                    Options:
+                    :q - exit room/chat
+                    :room number - create/join room at this number, e.g. :room 1
+                    :help - display this menu
+                    """;
+
     public Integer getRoomNumber() {
         return roomNumber;
     }
 
-    Worker(Socket socket, EventsBus eventsBus, Manager roomManager) {
+    public Worker(Socket socket, EventsBus eventsBus, Manager roomManager) {
         this.socket = socket;
         this.eventsBus = eventsBus;
         writer = new TextWriter(socket);
@@ -29,20 +39,16 @@ class Worker implements Runnable {
     @Override
     public void run() {
         new TextReader(socket, this::onText, this::onInputClose).read();
+        publish(ServerEventType.HELP, "");
     }
 
     private void onText(String text) {
         if (text.endsWith(":q")) {
-            if (roomNumber != 0) {
-                String leaveText = "Exited from room: " + roomNumber;
-                leaveRoom();
-                publish(ServerEventType.MESSAGE_RECEIVED, leaveText);
-            } else {
-                onInputClose();
-                Sockets.close(socket);
-            }
+           exit();
         } else if (text.contains(":room ")) {
             joinRoom(text);
+        } else if (text.endsWith(":help")) {
+            publish(ServerEventType.HELP, MENU);
         } else {
             publish(ServerEventType.MESSAGE_RECEIVED, text);
         }
@@ -63,23 +69,24 @@ class Worker implements Runnable {
                 .build());
     }
 
-    void send(String text) {
+    public void send(String text) {
         writer.write(text);
     }
 
-    private Integer getRoomNr(String text) {
-        Integer number = 0;
-        String num = text.substring(text.lastIndexOf(" ") + 1);
-        try {
-            number = Integer.parseInt(num);
-        } catch (NumberFormatException nfe) {
+    private void exit(){
+        if (roomNumber != 0) {
+            String leaveText = "Exited from room: " + roomNumber;
+            leaveRoom();
+            publish(ServerEventType.MESSAGE_RECEIVED, leaveText);
+        } else {
+            onInputClose();
+            Sockets.close(socket);
         }
-        return number;
     }
 
     private void joinRoom(String text) {
 
-        Integer number = getRoomNr(text);
+        Integer number = TextParser.parseLastNumber(text);
         if (number != 0) {
             boolean isCreated = roomManager.joinRoom(number, this);
 
@@ -88,7 +95,7 @@ class Worker implements Runnable {
                 roomNumber = number;
             } else {
                 roomNumber = number;
-                publish(ServerEventType.ROOM_JOINED, String.format("Joined room %s", number));//jak tu dodać/pobrać nazwe użytkownika?
+                publish(ServerEventType.MESSAGE_RECEIVED, String.format("Joined room %s", number));
             }
         }
     }
