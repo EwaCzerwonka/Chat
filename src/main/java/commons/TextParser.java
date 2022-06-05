@@ -16,6 +16,9 @@ public class TextParser {
         return number;
     }
 
+    public static String getFirstPart(String text, String separator){
+        return StringUtils.substringBefore(text, separator);
+    }
     public static String getLastPart(String text, String separator){
         return StringUtils.substringAfter(text, separator).trim();
     }

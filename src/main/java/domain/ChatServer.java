@@ -7,6 +7,7 @@ import contracts.ServerWorkers;
 import dependencies.*;
 import logger.MessagesHistoryLogger;
 import logger.ServerEventsLogger;
+import logger.ServerHistoryLogger;
 import lombok.RequiredArgsConstructor;
 
 import java.io.IOException;
@@ -52,8 +53,9 @@ public class ChatServer {
         var eventsBus = new EventsBus();
         eventsBus.addConsumer(new ServerEventsLogger());
         eventsBus.addConsumer(new MessagesHistoryLogger());
+        eventsBus.addConsumer(new ServerHistoryLogger());
         var serviceWorkers = new SynchronizedServiceWorkers(new HashSetServerWorkers());
-        var roomManager = new SynchronizedRoomRoomManager(new PrivateRoomManager());
+        var roomManager = new SynchronizedRoomManager(new PrivateRoomManager());
         var fileManager = new SynchronizedFileWorker(new FileWorker());
         var server = new ChatServer(serviceWorkers, eventsBus, newFixedThreadPool(THREADS_COUNT), roomManager, fileManager);
         server.start(port);

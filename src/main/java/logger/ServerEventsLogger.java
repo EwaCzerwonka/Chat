@@ -6,8 +6,7 @@ import lombok.extern.java.Log;
 import java.util.function.Consumer;
 
 @Log
-public
-class ServerEventsLogger implements Consumer<ServerEvent> {
+public class ServerEventsLogger implements Consumer<ServerEvent> {
 
     @Override
     public void accept(ServerEvent event) {

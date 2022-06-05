@@ -5,7 +5,7 @@ import domain.Worker;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class SynchronizedRoomRoomManager implements RoomManager {
+public class SynchronizedRoomManager implements RoomManager {
 
     private final RoomManager roomManager;
     @Override

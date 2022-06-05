@@ -7,8 +7,7 @@ import lombok.extern.java.Log;
 import java.util.function.Consumer;
 
 @Log
-public
-class MessagesHistoryLogger implements Consumer<ServerEvent> {
+public class MessagesHistoryLogger implements Consumer<ServerEvent> {
 
     @Override
     public void accept(ServerEvent event) {

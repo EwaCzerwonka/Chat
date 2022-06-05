@@ -42,7 +42,7 @@ public class Worker implements Runnable {
 
     private void onText(String text) {
         if (text.endsWith(WorkerEventType.QUIT.label)) {
-            exit();
+            exit(text, WorkerEventType.QUIT.label);
         } else if (text.contains(WorkerEventType.JOIN.label)) {
             joinRoom(text, WorkerEventType.JOIN.label);
         } else if (text.contains(WorkerEventType.UPLOAD.label)) {
@@ -75,9 +75,9 @@ public class Worker implements Runnable {
         writer.write(text);
     }
 
-    private void exit() {
+    private void exit(String text, String separator) {
         if (roomNumber != 0) {
-            String leaveText = "Exited from room: " + roomNumber;
+            String leaveText = TextParser.getFirstPart(text, separator) + " Exited from room: " + roomNumber;
             leaveRoom();
             publish(ServerEventType.MESSAGE_RECEIVED, leaveText);
         } else {
@@ -89,13 +89,15 @@ public class Worker implements Runnable {
         Integer number = TextParser.parseLastNumber(text, separator);
         if (number != 0) {
             boolean isCreated = roomManager.joinRoom(number, this);
+            String user = TextParser.getFirstPart(text, separator);
 
             if (isCreated) {
-                publish(ServerEventType.ROOM_CREATED, String.format("Room %s created", number));
+                publish(ServerEventType.ROOM_CREATED,
+                        String.format("%s Room %s created", user, number));
                 roomNumber = number;
             } else {
                 roomNumber = number;
-                publish(ServerEventType.MESSAGE_RECEIVED, String.format("Joined room %s", number));
+                publish(ServerEventType.MESSAGE_RECEIVED, String.format("%s Joined room %s", user, number));
             }
         }
     }
