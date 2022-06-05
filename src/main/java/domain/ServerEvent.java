@@ -1,6 +1,5 @@
 package domain;
 
-import domain.Worker;
 import lombok.Builder;
 import lombok.Getter;
 

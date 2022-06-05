@@ -27,7 +27,6 @@ public class ChatClient {
         var consoleReader = new Thread(readFromConsole);
         consoleReader.setDaemon(true);
         consoleReader.start();
-        log.info(WorkerEventType.MENU.label);
     }
 
     public static void main(String[] args) throws IOException {

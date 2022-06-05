@@ -36,6 +36,7 @@ public class Worker implements Runnable {
 
     @Override
     public void run() {
+        publish(ServerEventType.INTERNAL, WorkerEventType.MENU.label);
         new TextReader(socket, this::onText, this::onInputClose).read();
     }
 

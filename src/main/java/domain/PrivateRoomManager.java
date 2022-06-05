@@ -5,7 +5,7 @@ import contracts.RoomManager;
 import java.util.*;
 
 
-public class PrivateRoomRoomManager implements RoomManager {
+public class PrivateRoomManager implements RoomManager {
     private final Set<PrivateRoom> rooms = new HashSet<>();
 
     public boolean joinRoom(Integer number, Worker worker){

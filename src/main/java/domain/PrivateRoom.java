@@ -1,6 +1,5 @@
 package domain;
 
-import domain.Worker;
 import lombok.Getter;
 
 import java.util.HashSet;

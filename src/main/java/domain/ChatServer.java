@@ -53,7 +53,7 @@ public class ChatServer {
         eventsBus.addConsumer(new ServerEventsLogger());
         eventsBus.addConsumer(new MessagesHistoryLogger());
         var serviceWorkers = new SynchronizedServiceWorkers(new HashSetServerWorkers());
-        var roomManager = new SynchronizedRoomRoomManager(new PrivateRoomRoomManager());
+        var roomManager = new SynchronizedRoomRoomManager(new PrivateRoomManager());
         var fileManager = new SynchronizedFileWorker(new FileWorker());
         var server = new ChatServer(serviceWorkers, eventsBus, newFixedThreadPool(THREADS_COUNT), roomManager, fileManager);
         server.start(port);
