@@ -1,12 +1,10 @@
 package domain;
 
 import commons.Sockets;
-import contracts.Manager;
+import contracts.FileManager;
+import contracts.RoomManager;
 import contracts.ServerWorkers;
-import dependencies.HashSetServerWorkers;
-import dependencies.ServerEventsProcessor;
-import dependencies.SynchronizedRoomManager;
-import dependencies.SynchronizedServiceWorkers;
+import dependencies.*;
 import logger.MessagesHistoryLogger;
 import logger.ServerEventsLogger;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +26,8 @@ public class ChatServer {
     private final EventsBus eventsBus;
     private final ExecutorService executorService;
 
-    private final Manager roomManager;
+    private final RoomManager roomManager;
+    private final FileManager fileManager;
 
     private void start(int port) throws IOException {
         eventsBus.addConsumer(new ServerEventsProcessor(serverWorkers));
@@ -43,7 +42,7 @@ public class ChatServer {
     }
 
     private void createWorker(Socket socket) {
-        var worker = new Worker(socket, eventsBus, roomManager);
+        var worker = new Worker(socket, eventsBus, roomManager, fileManager);
         serverWorkers.add(worker);
         executorService.execute(worker);
     }
@@ -54,8 +53,9 @@ public class ChatServer {
         eventsBus.addConsumer(new ServerEventsLogger());
         eventsBus.addConsumer(new MessagesHistoryLogger());
         var serviceWorkers = new SynchronizedServiceWorkers(new HashSetServerWorkers());
-        var roomManager = new SynchronizedRoomManager(new RoomManager());
-        var server = new ChatServer(serviceWorkers, eventsBus, newFixedThreadPool(THREADS_COUNT), roomManager);
+        var roomManager = new SynchronizedRoomRoomManager(new PrivateRoomRoomManager());
+        var fileManager = new SynchronizedFileWorker(new FileWorker());
+        var server = new ChatServer(serviceWorkers, eventsBus, newFixedThreadPool(THREADS_COUNT), roomManager, fileManager);
         server.start(port);
     }
 

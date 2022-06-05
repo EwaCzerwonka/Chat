@@ -1,11 +1,11 @@
 package domain;
 
-import contracts.Manager;
+import contracts.RoomManager;
 
 import java.util.*;
 
 
-public class RoomManager implements Manager {
+public class PrivateRoomRoomManager implements RoomManager {
     private final Set<PrivateRoom> rooms = new HashSet<>();
 
     public boolean joinRoom(Integer number, Worker worker){

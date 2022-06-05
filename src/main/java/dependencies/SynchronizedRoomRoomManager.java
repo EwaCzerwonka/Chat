@@ -1,20 +1,20 @@
 package dependencies;
 
-import contracts.Manager;
+import contracts.RoomManager;
 import domain.Worker;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class SynchronizedRoomManager implements Manager {
+public class SynchronizedRoomRoomManager implements RoomManager {
 
-    private final Manager manager;
+    private final RoomManager roomManager;
     @Override
     public synchronized boolean joinRoom(Integer roomNumber, Worker worker) {
-        return manager.joinRoom(roomNumber, worker);
+        return roomManager.joinRoom(roomNumber, worker);
     }
 
     @Override
     public synchronized void leaveRoom(Worker worker) {
-        manager.leaveRoom(worker);
+        roomManager.leaveRoom(worker);
     }
 }

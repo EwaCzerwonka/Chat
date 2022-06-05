@@ -2,7 +2,7 @@ package contracts;
 
 import domain.Worker;
 
-public interface Manager {
+public interface RoomManager {
     boolean joinRoom(Integer roomNumber, Worker worker);
     void leaveRoom(Worker worker);
 }

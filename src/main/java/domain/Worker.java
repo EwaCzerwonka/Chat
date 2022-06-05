@@ -4,7 +4,9 @@ import commons.Sockets;
 import commons.TextParser;
 import commons.TextReader;
 import commons.TextWriter;
-import contracts.Manager;
+import contracts.FileManager;
+import contracts.RoomManager;
+import org.apache.commons.lang3.StringUtils;
 
 import java.net.Socket;
 
@@ -14,41 +16,40 @@ public class Worker implements Runnable {
     private final Socket socket;
     private final EventsBus eventsBus;
     private final TextWriter writer;
+    private final FileManager fileManager;
 
-    private final Manager roomManager;
+    private final RoomManager roomManager;
 
     private Integer roomNumber = 0;
-    private static final String MENU = """
-                    Options:
-                    :q - exit room/chat
-                    :room number - create/join room at this number, e.g. :room 1
-                    :help - display this menu
-                    """;
 
     public Integer getRoomNumber() {
         return roomNumber;
     }
 
-    public Worker(Socket socket, EventsBus eventsBus, Manager roomManager) {
+    public Worker(Socket socket, EventsBus eventsBus, RoomManager roomManager, FileManager fileManager) {
         this.socket = socket;
         this.eventsBus = eventsBus;
         writer = new TextWriter(socket);
+        this.fileManager = fileManager;
         this.roomManager = roomManager;
     }
 
     @Override
     public void run() {
         new TextReader(socket, this::onText, this::onInputClose).read();
-        publish(ServerEventType.HELP, "");
     }
 
     private void onText(String text) {
-        if (text.endsWith(":q")) {
-           exit();
-        } else if (text.contains(":room ")) {
-            joinRoom(text);
-        } else if (text.endsWith(":help")) {
-            publish(ServerEventType.HELP, MENU);
+        if (text.endsWith(WorkerEventType.QUIT.label)) {
+            exit();
+        } else if (text.contains(WorkerEventType.JOIN.label)) {
+            joinRoom(text, WorkerEventType.JOIN.label);
+        } else if (text.contains(WorkerEventType.UPLOAD.label)) {
+            uploadFile(text, WorkerEventType.UPLOAD.label);
+        } else if (text.contains(WorkerEventType.DOWNLOAD.label)) {
+            downloadFile();
+        } else if (text.endsWith(WorkerEventType.HELP.label)) {
+            publish(ServerEventType.INTERNAL, WorkerEventType.MENU.label);
         } else {
             publish(ServerEventType.MESSAGE_RECEIVED, text);
         }
@@ -73,20 +74,18 @@ public class Worker implements Runnable {
         writer.write(text);
     }
 
-    private void exit(){
+    private void exit() {
         if (roomNumber != 0) {
             String leaveText = "Exited from room: " + roomNumber;
             leaveRoom();
             publish(ServerEventType.MESSAGE_RECEIVED, leaveText);
         } else {
-            onInputClose();
             Sockets.close(socket);
         }
     }
 
-    private void joinRoom(String text) {
-
-        Integer number = TextParser.parseLastNumber(text);
+    private void joinRoom(String text, String separator) {
+        Integer number = TextParser.parseLastNumber(text, separator);
         if (number != 0) {
             boolean isCreated = roomManager.joinRoom(number, this);
 
@@ -105,5 +104,22 @@ public class Worker implements Runnable {
         roomNumber = 0;
     }
 
+    private void uploadFile(String text, String separator) {
+        String uploaded = fileManager.upload(TextParser.getLastPart(text, separator), roomNumber);
+        if (StringUtils.isNotEmpty(uploaded)) {
+            publish(ServerEventType.MESSAGE_RECEIVED, String.format("A file: %s  has been uploaded", uploaded));
+        } else {
+            publish(ServerEventType.INTERNAL, WorkerEventType.ERROR.label);
+        }
+    }
+
+    private void downloadFile() {
+        String downloaded = fileManager.download(roomNumber);
+        if (StringUtils.isNotEmpty(downloaded)) {
+            publish(ServerEventType.INTERNAL, "Downloaded: " + downloaded);
+        } else {
+            publish(ServerEventType.INTERNAL, WorkerEventType.ERROR.label);
+        }
+    }
 
 }

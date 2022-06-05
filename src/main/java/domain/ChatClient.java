@@ -27,8 +27,7 @@ public class ChatClient {
         var consoleReader = new Thread(readFromConsole);
         consoleReader.setDaemon(true);
         consoleReader.start();
-        log.info("To create or join a private room enter ':room room_number'");
-        log.info("To leave enter ':q'");
+        log.info(WorkerEventType.MENU.label);
     }
 
     public static void main(String[] args) throws IOException {
