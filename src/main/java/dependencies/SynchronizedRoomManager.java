@@ -17,4 +17,9 @@ public class SynchronizedRoomManager implements RoomManager {
     public synchronized void leaveRoom(Worker worker) {
         roomManager.leaveRoom(worker);
     }
+
+    @Override
+    public boolean canRead(Worker worker, Integer roomNumber) {
+        return roomManager.canRead(worker, roomNumber);
+    }
 }

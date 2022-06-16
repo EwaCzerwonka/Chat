@@ -22,8 +22,7 @@ public class PrivateRoom {
      historyWorkers.add(worker);
  }
 
- public boolean removeFromRoom(Worker worker) {
+ public void removeFromRoom(Worker worker) {
      workers.remove(worker);
-     return workers.isEmpty();
  }
 }

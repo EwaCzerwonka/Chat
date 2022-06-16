@@ -24,7 +24,13 @@ public class PrivateRoomManager implements RoomManager {
 
     public void leaveRoom(Worker worker){
         PrivateRoom privateRoom = rooms.stream().filter(room -> room.getRoomNumber() == worker.getRoomNumber()).toList().get(0);
-        if(privateRoom.removeFromRoom(worker))
-            rooms.remove(privateRoom);
+        privateRoom.removeFromRoom(worker);
+    }
+
+
+    public boolean canRead(Worker worker, Integer roomNumber) {
+        return rooms.stream()
+                .filter(room -> room.getRoomNumber() == roomNumber)
+                .anyMatch(room -> room.getHistoryWorkers().contains(worker));
     }
 }

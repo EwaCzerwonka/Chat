@@ -50,13 +50,13 @@ public class ChatServer {
 
     public static void main(String[] args) throws IOException {
         var port = Sockets.parsePort(args[0], DEFAULT_PORT);
+        var fileManager = new SynchronizedFileWorker(new FileWorker());
         var eventsBus = new EventsBus();
         eventsBus.addConsumer(new ServerEventsLogger());
         eventsBus.addConsumer(new MessagesHistoryLogger());
-        eventsBus.addConsumer(new ServerHistoryLogger());
+        eventsBus.addConsumer(new ServerHistoryLogger(fileManager));
         var serviceWorkers = new SynchronizedServiceWorkers(new HashSetServerWorkers());
         var roomManager = new SynchronizedRoomManager(new PrivateRoomManager());
-        var fileManager = new SynchronizedFileWorker(new FileWorker());
         var server = new ChatServer(serviceWorkers, eventsBus, newFixedThreadPool(THREADS_COUNT), roomManager, fileManager);
         server.start(port);
     }

@@ -9,6 +9,7 @@ import contracts.RoomManager;
 import org.apache.commons.lang3.StringUtils;
 
 import java.net.Socket;
+import java.util.List;
 
 
 public class Worker implements Runnable {
@@ -51,10 +52,14 @@ public class Worker implements Runnable {
             downloadFile();
         } else if (text.endsWith(WorkerEventType.HELP.label)) {
             publish(ServerEventType.INTERNAL, WorkerEventType.MENU.label);
+        } else if(text.contains(WorkerEventType.HISTORY.label)) {
+            readHistory(text, WorkerEventType.HISTORY.label);
         } else {
             publish(ServerEventType.MESSAGE_RECEIVED, text);
         }
     }
+
+
 
     private void onInputClose() {
         eventsBus.publish(ServerEvent.builder()
@@ -123,6 +128,24 @@ public class Worker implements Runnable {
         } else {
             publish(ServerEventType.INTERNAL, WorkerEventType.ERROR.label);
         }
+    }
+
+    private void readHistory(String text, String separator) {
+        boolean canRead = true;
+        Integer number = TextParser.parseLastNumber(text, separator);
+        if(number != 0){
+            canRead = roomManager.canRead(this, number);
+        }
+        if(canRead) {
+            publish(ServerEventType.HISTORY_READ, String.valueOf(number));
+        } else {
+            publish(ServerEventType.INTERNAL, WorkerEventType.HIST_ERROR.label);
+        }
+
+    }
+
+    public void displayHistory(List<String> historyLog){
+       historyLog.forEach(this::send);
     }
 
 }

@@ -1,15 +1,16 @@
 package logger;
 
+import contracts.FileManager;
 import domain.ServerEvent;
 import domain.ServerEventType;
+import domain.Worker;
 import lombok.extern.java.Log;
+import org.apache.commons.lang3.StringUtils;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.function.Consumer;
 
 @Log
@@ -18,31 +19,26 @@ public class ServerHistoryLogger implements Consumer<ServerEvent> {
 
     private StringBuffer buffer;
     private final String filePath = System.getProperty("user.home") + File.separator + "ChatHistory.txt";
-    private final File file;
+    private final FileManager fileManager;
+    private final File historyLog;
 
-    public ServerHistoryLogger() {
-        file = new File(filePath);
-        prepareFile(file);
+    public ServerHistoryLogger(FileManager fileManager) {
+        this.fileManager = fileManager;
+        historyLog = fileManager.prepareFile(filePath);
         buffer = new StringBuffer(capacity);
-    }
-
-    private void prepareFile(File file) {
-        try {
-            if (!file.exists()) {
-                file.createNewFile();
-            }
-        } catch (IOException e) {
-            log.info("Error during saving history to file");
-        }
     }
 
     @Override
     public void accept(ServerEvent event) {
         if (event.getType().equals(ServerEventType.MESSAGE_RECEIVED)) {
-            saveMsg( getDateTime()+ " New message: " + event.getPayload() + System.lineSeparator(), false);
+            saveMsg( event.getSource().getRoomNumber() + ": " + getDateTime()+ ": " + event.getPayload() + System.lineSeparator(), false);
         }
         else if(event.getType().equals(ServerEventType.CONNECTION_CLOSED)){
-             saveMsg(getDateTime()+ " Connection from client closed." + System.lineSeparator(), true);
+             saveMsg("", true);
+        }
+        else if(event.getType().equals(ServerEventType.HISTORY_READ)){
+            saveMsg("", true);
+            getHistory(event.getSource(), event.getPayload(), historyLog);
         }
     }
 
@@ -50,19 +46,17 @@ public class ServerHistoryLogger implements Consumer<ServerEvent> {
         return LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss"));
     }
     private void saveMsg(String text, boolean force) {
-        buffer.append(text);
+        if(StringUtils.isNotEmpty(text)) {
+            buffer.append(text);
+        }
         if (buffer.capacity() > capacity || force) {
-            saveToFile(buffer.toString());
+            fileManager.saveToFile(buffer.toString(), historyLog);
             buffer.delete(0, buffer.length());
             buffer = new StringBuffer(capacity);
         }
     }
-
-    private void saveToFile(String text) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
-            writer.append(text);
-        } catch (IOException ioe) {
-            log.info("Error during saving history to file");
-        }
+    private void getHistory(Worker worker, String roomNumber, File file){
+        List<String> list = fileManager.getHistory(roomNumber, file);
+        worker.displayHistory(list);
     }
 }
